@@ -1,7 +1,7 @@
 export async function onRequest(context) {
     const { request, env } = context;
     const url = new URL(request.url);
-    const ADMIN_PASS = "alireza123"; // رمز ادمین را اینجا تغییر بده
+    const ADMIN_PASS = "2580"; // رمز ادمین را اینجا تغییر بده
 
     if (request.method === "GET" && url.searchParams.has("user")) {
         const user = url.searchParams.get("user");
