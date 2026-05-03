@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4 text-purple-600">مدیریت مشتریان</h1>
+        <input type="password" id="pass" placeholder="رمز عبور ادمین" class="border p-2 w-full mb-4 rounded">
+        
+        <div class="flex gap-2 mb-6">
+            <input type="text" id="username" placeholder="یوزرنیم" class="border p-2 flex-1 rounded">
+            <input type="number" id="total" placeholder="حجم کل (GB)" class="border p-2 w-24 rounded">
+            <input type="number" id="used" placeholder="مصرف شده" class="border p-2 w-24 rounded">
+            <button onclick="saveUser()" class="bg-purple-600 text-white px-4 rounded hover:bg-purple-700">ذخیره</button>
+        </div>
+
+        <button onclick="loadUsers()" class="bg-gray-800 text-white px-4 py-2 rounded mb-4 w-full">بارگذاری لیست مشتریان</button>
+        <div id="list" class="space-y-2"></div>
+    </div>
+
+    <script>
+        async function req(method, body = null) {
+            const pass = document.getElementById('pass').value;
+            return fetch('/api/users', {
+                method,
+                headers: { 'Authorization': pass, 'Content-Type': 'application/json' },
+                body: body ? JSON.stringify(body) : null
+            }).then(r => r.json());
+        }
+
+        async function saveUser() {
+            const user = document.getElementById('username').value;
+            const total = Number(document.getElementById('total').value);
+            const used = Number(document.getElementById('used').value);
+            const res = await req('POST', { user, total, used });
+            if(res.success) { alert('ذخیره شد'); loadUsers(); } else { alert('خطا یا رمز اشتباه'); }
+        }
+
+        async function loadUsers() {
+            const res = await req('GET');
+            if(res.error) return alert('رمز اشتباه است');
+            const list = document.getElementById('list');
+            list.innerHTML = '';
+            res.keys.forEach(k => {
+                list.innerHTML += `<div class="flex justify-between bg-gray-50 p-3 border rounded items-center">
+                    <span class="font-bold">${k.name}</span>
+                    <button onclick="delUser('${k.name}')" class="bg-red-500 text-white px-3 py-1 rounded text-sm">حذف</button>
+                </div>`;
+            });
+        }
+
+        async function delUser(user) {
+            if(!confirm('حذف شود؟')) return;
+            const res = await req('DELETE', { user });
+            if(res.success) loadUsers();
+        }
+    </script>
+</body>
+</html>
